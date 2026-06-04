@@ -1,440 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Earth Impact Simulator</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Arial', sans-serif;
-    background: #000;
-    color: #fff;
-    min-height: 100vh;
-  }
-  .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  .header {
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    padding: 20px;
-    text-align: center;
-    border-radius: 15px;
-    margin-bottom: 20px;
-  }
-  .header h1 {
-    font-size: 2.5em;
-    margin-bottom: 10px;
-  }
-  @media (max-width: 600px) {
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Free Text Statistics & Analytics Tool - Analyze word count, character count, reading time and more.">
+  <title>Text Statistics & Analytics - Word Counter & Character Counter</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: linear-gradient(135deg, #0f0f1e 0%, #1a0033 50%, #0f0f1e 100%);
+      font-family: 'Space Grotesk', sans-serif;
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 15px 20px;
+      background: rgba(0, 255, 255, 0.05);
+      border-radius: 10px;
+      border: 1px solid rgba(0, 255, 255, 0.1);
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      color: #00ffff;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
     .header h1 {
-      font-size: 1.8em;
+      font-size: 2.5rem;
+      background: linear-gradient(135deg, #00ffff, #00d4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
     }
-    .header p {
-      font-size: 0.9em;
+    
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
-  }
-  .main-grid {
-    display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 20px;
-  }
-  @media (max-width: 900px) {
-    .main-grid {
-      grid-template-columns: 1fr;
+    
+    .editor-box {
+      grid-column: 1 / 3;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 20px;
     }
-    .sidebar {
-      order: -1;
+    
+    .label {
+      color: #00ffff;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: block;
     }
-  }
-  .earth-section {
-    background: rgba(30, 60, 114, 0.3);
-    border-radius: 15px;
-    padding: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 500px;
-    position: relative;
-  }
-  .earth {
-    width: 350px;
-    height: 350px;
-    border-radius: 50%;
-    position: relative;
-    background: url('https://raw.githubusercontent.com/brokenurni/my-website/main/land_ocean_ice_cloud_2048.jpg') center center / cover no-repeat;
-    background-size: 400px 400px;
-    box-shadow: 0 0 60px rgba(46, 139, 87, 0.6);
-    animation: rotate 30s linear infinite;
-    overflow: visible;
-  }
-  @media (max-width: 600px) {
-    .earth {
-      width: 250px;
+    
+    textarea {
+      width: 100%;
       height: 250px;
-      background-size: 300px 300px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #00ffff;
+      font-size: 1rem;
+      padding: 15px;
+      resize: vertical;
+      font-family: inherit;
     }
-  }
-  @keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-  .pollution-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: rgba(139, 69, 19, 0);
-    transition: background 0.5s;
-    pointer-events: none;
-  }
-  .ice-cap {
-    position: absolute;
-    background: radial-gradient(circle, #fff, #b0e0e6);
-    border-radius: 50%;
-    transition: all 0.5s;
-  }
-  .ice-top {
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 50px;
-  }
-  .ice-bottom {
-    bottom: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100px;
-    height: 50px;
-  }
-  .trash-item, .fire-item {
-    position: absolute;
-    font-size: 30px;
-    animation: bob 2s ease-in-out infinite;
-    filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.8));
-  }
-  @keyframes bob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-  .fire-item {
-    animation: flicker 0.3s infinite alternate;
-  }
-  @keyframes flicker {
-    0% { opacity: 0.8; }
-    100% { opacity: 1; filter: brightness(1.2); }
-  }
-  .sidebar {
-    background: rgba(30, 60, 114, 0.5);
-    border-radius: 15px;
-    padding: 20px;
-  }
-  .stat-card {
-    background: rgba(255,255,255,0.1);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-    border-left: 4px solid #4CAF50;
-  }
-  .stat-card.warning { border-left-color: #ff9800; }
-  .stat-card.danger { border-left-color: #f44336; }
-  .stat-label {
-    font-size: 0.9em;
-    opacity: 0.8;
-    margin-bottom: 5px;
-  }
-  .stat-value {
-    font-size: 2em;
-    font-weight: bold;
-  }
-  .health-bar {
-    width: 100%;
-    height: 20px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 8px;
-  }
-  .health-fill {
-    height: 100%;
-    background: #4CAF50;
-    transition: all 0.5s;
-    text-align: center;
-    line-height: 20px;
-    font-size: 0.8em;
-    font-weight: bold;
-  }
-  .controls {
-    margin-top: 20px;
-  }
-  .controls h3 {
-    margin-bottom: 15px;
-  }
-  .btn {
-    width: 100%;
-    padding: 15px;
-    margin: 10px 0;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s;
-    color: #fff;
-  }
-  .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-  }
-  .btn-pollution { background: linear-gradient(135deg, #8b4513, #654321); }
-  .btn-trash { background: linear-gradient(135deg, #555, #333); }
-  .btn-fire { background: linear-gradient(135deg, #ff4500, #ff6347); }
-  .btn-ice { background: linear-gradient(135deg, #4682b4, #5f9ea0); }
-  .btn-reset { background: linear-gradient(135deg, #4CAF50, #45a049); }
-  .warning-box {
-    background: rgba(255, 0, 0, 0.2);
-    border: 2px solid rgba(255, 0, 0, 0.5);
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 20px;
-  }
-  .warning-box h4 {
-    color: #ff6b6b;
-    margin-bottom: 10px;
-  }
-  .warning-item {
-    margin: 8px 0;
-    font-size: 0.9em;
-  }
-</style>
+    
+    textarea:focus {
+      outline: none;
+      border-color: #00ffff;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      grid-column: 1 / 3;
+    }
+    
+    .stat-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.15);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2.5rem;
+      color: #00ffff;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      color: #a0d4ff;
+      font-size: 0.9rem;
+    }
+    
+    .button-group {
+      grid-column: 1 / 3;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #00ffff, #00d4ff);
+      color: #0f0f1e;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+    }
+    
+    @media (max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+      
+      .editor-box, .stats-grid, .button-group {
+        grid-column: 1 !important;
+      }
+      
+      .header h1 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h1>🌍 Earth Impact Simulator</h1>
-      <p>See how pollution and climate change affect our planet in real-time</p>
+    <div class="nav">
+      <a href="index.html" class="logo">← Back Home</a>
+      <div style="color: #00ffff; font-weight: 600;">Text Analytics</div>
     </div>
     
-    <div class="main-grid">
-      <div class="earth-section">
-        <div class="earth" id="earth">
-          <div class="pollution-overlay" id="pollution"></div>
-          <div class="ice-cap ice-top" id="iceTop"></div>
-          <div class="ice-cap ice-bottom" id="iceBottom"></div>
-        </div>
+    <div class="header">
+      <h1>📊 Text Statistics & Analytics</h1>
+      <p style="color: #a0d4ff;">Analyze your text instantly</p>
+    </div>
+    
+    <div class="content">
+      <div class="editor-box">
+        <label class="label">📝 Paste Your Text</label>
+        <textarea id="textInput" placeholder="Paste your text here..." oninput="updateStats()"></textarea>
       </div>
       
-      <div class="sidebar">
-        <div class="stat-card" id="healthCard">
-          <div class="stat-label">🌍 Earth Health</div>
-          <div class="stat-value" id="healthValue">100%</div>
-          <div class="health-bar">
-            <div class="health-fill" id="healthFill" style="width: 100%;"></div>
-          </div>
-        </div>
-        
-        <div class="stat-card" id="tempCard">
-          <div class="stat-label">🌡️ Temperature</div>
-          <div class="stat-value" id="tempValue">15.0°C</div>
-        </div>
-        
-        <div class="stat-card" id="pollutionCard">
-          <div class="stat-label">💨 Pollution</div>
-          <div class="stat-value" id="pollutionValue">0%</div>
-        </div>
-        
-        <div class="stat-card" id="trashCard">
-          <div class="stat-label">🗑️ Waste</div>
-          <div class="stat-value" id="trashValue">0 tons</div>
-        </div>
-        
-        <div class="stat-card" id="iceCard">
-          <div class="stat-label">🧊 Ice Caps</div>
-          <div class="stat-value" id="iceValue">100%</div>
-        </div>
-        
-        <div class="controls">
-          <h3>Add Impact:</h3>
-          <button class="btn btn-pollution" onclick="addPollution()">💨 Add Pollution</button>
-          <button class="btn btn-trash" onclick="addTrash()">🗑️ Dump Trash</button>
-          <button class="btn btn-fire" onclick="addFire()">🔥 Start Fire</button>
-          <button class="btn btn-ice" onclick="meltIce()">🌊 Melt Ice</button>
-          <button class="btn btn-reset" onclick="resetEarth()">♻️ Reset Earth</button>
-        </div>
-        
-        <div class="warning-box" id="warningBox" style="display: none;">
-          <h4>⚠️ Consequences:</h4>
-          <div id="warningList"></div>
-        </div>
+      <div class="stat-box">
+        <div class="stat-value" id="charCount">0</div>
+        <div class="stat-label">Characters</div>
+      </div>
+      
+      <div class="stat-box">
+        <div class="stat-value" id="wordCount">0</div>
+        <div class="stat-label">Words</div>
+      </div>
+      
+      <div class="stat-box">
+        <div class="stat-value" id="lineCount">0</div>
+        <div class="stat-label">Lines</div>
+      </div>
+      
+      <div class="stat-box">
+        <div class="stat-value" id="readTime">0m</div>
+        <div class="stat-label">Read Time</div>
+      </div>
+      
+      <div class="button-group">
+        <button class="btn" onclick="clearText()">🗑️ Clear</button>
+        <button class="btn" onclick="copyText()">📋 Copy</button>
       </div>
     </div>
   </div>
-
-<script>
-let data = {
-  health: 100,
-  temp: 15,
-  pollution: 0,
-  trash: 0,
-  ice: 100,
-  fires: 0
-};
-
-function update() {
-  const health = Math.max(0, data.health);
-  const temp = data.temp.toFixed(1);
-  const pollution = Math.min(100, data.pollution);
-  const ice = Math.max(0, data.ice);
   
-  // Update values
-  document.getElementById('healthValue').textContent = health.toFixed(0) + '%';
-  document.getElementById('tempValue').textContent = temp + '°C';
-  document.getElementById('pollutionValue').textContent = pollution.toFixed(0) + '%';
-  document.getElementById('trashValue').textContent = data.trash + ' tons';
-  document.getElementById('iceValue').textContent = ice.toFixed(0) + '%';
-  
-  // Health bar
-  const healthFill = document.getElementById('healthFill');
-  healthFill.style.width = health + '%';
-  
-  const healthCard = document.getElementById('healthCard');
-  if (health > 70) {
-    healthFill.style.background = '#4CAF50';
-    healthCard.className = 'stat-card';
-  } else if (health > 40) {
-    healthFill.style.background = '#ff9800';
-    healthCard.className = 'stat-card warning';
-  } else {
-    healthFill.style.background = '#f44336';
-    healthCard.className = 'stat-card danger';
-  }
-  
-  // Earth appearance
-  const earth = document.getElementById('earth');
-  
-  // Create a dark overlay effect based on health
-  let filterValue = '';
-  if (health > 70) {
-    earth.style.boxShadow = '0 0 60px rgba(46, 139, 87, 0.6)';
-    filterValue = 'brightness(1) saturate(1.2)';
-  } else if (health > 40) {
-    earth.style.boxShadow = '0 0 60px rgba(139, 115, 85, 0.6)';
-    filterValue = 'brightness(0.8) saturate(0.7) sepia(0.3)';
-  } else {
-    earth.style.boxShadow = '0 0 60px rgba(101, 67, 33, 0.6)';
-    filterValue = 'brightness(0.5) saturate(0.4) sepia(0.6)';
-  }
-  earth.style.filter = filterValue;
-  
-  // Pollution overlay
-  const pollutionOpacity = pollution / 100 * 0.8;
-  document.getElementById('pollution').style.background = `rgba(139, 69, 19, ${pollutionOpacity})`;
-  
-  // Ice caps
-  const iceSize = ice;
-  const iceTop = document.getElementById('iceTop');
-  const iceBottom = document.getElementById('iceBottom');
-  iceTop.style.width = iceSize + 'px';
-  iceTop.style.height = (iceSize / 2) + 'px';
-  iceBottom.style.width = iceSize + 'px';
-  iceBottom.style.height = (iceSize / 2) + 'px';
-  
-  // Card warnings
-  document.getElementById('tempCard').className = temp > 18 ? 'stat-card danger' : (temp > 16 ? 'stat-card warning' : 'stat-card');
-  document.getElementById('pollutionCard').className = pollution > 60 ? 'stat-card danger' : (pollution > 30 ? 'stat-card warning' : 'stat-card');
-  document.getElementById('iceCard').className = ice < 50 ? 'stat-card danger' : (ice < 75 ? 'stat-card warning' : 'stat-card');
-  
-  // Warnings
-  showWarnings();
-}
-
-function showWarnings() {
-  const warnings = [];
-  
-  if (data.pollution > 70) warnings.push('🫁 Severe air pollution causing respiratory diseases');
-  if (data.temp > 18) warnings.push('🌊 Rising sea levels flooding coastal cities');
-  if (data.ice < 50) warnings.push('🐧 Polar animals losing their habitat');
-  if (data.trash > 100) warnings.push('🐟 Ocean animals dying from plastic');
-  if (data.fires > 5) warnings.push('🌲 Massive deforestation and carbon release');
-  if (data.health < 40) warnings.push('☠️ Mass extinction event in progress');
-  
-  const box = document.getElementById('warningBox');
-  const list = document.getElementById('warningList');
-  
-  if (warnings.length > 0) {
-    box.style.display = 'block';
-    list.innerHTML = warnings.map(w => `<div class="warning-item">${w}</div>`).join('');
-  } else {
-    box.style.display = 'none';
-  }
-}
-
-function addPollution() {
-  data.pollution += 15;
-  data.health -= 5;
-  data.temp += 0.3;
-  update();
-}
-
-function addTrash() {
-  data.trash += 25;
-  data.health -= 3;
-  data.pollution += 5;
-  
-  const trash = document.createElement('div');
-  trash.className = 'trash-item';
-  const icons = ['🗑️', '🥤', '🍔', '📦', '🛍️', '🧴', '🥡'];
-  trash.textContent = icons[Math.floor(Math.random() * icons.length)];
-  trash.style.left = (Math.random() * 80 + 10) + '%';
-  trash.style.top = (Math.random() * 80 + 10) + '%';
-  document.getElementById('earth').appendChild(trash);
-  
-  update();
-}
-
-function addFire() {
-  data.fires++;
-  data.temp += 0.5;
-  data.health -= 7;
-  data.pollution += 10;
-  
-  const fire = document.createElement('div');
-  fire.className = 'fire-item';
-  fire.textContent = '🔥';
-  fire.style.left = (Math.random() * 80 + 10) + '%';
-  fire.style.top = (Math.random() * 80 + 10) + '%';
-  document.getElementById('earth').appendChild(fire);
-  
-  update();
-}
-
-function meltIce() {
-  data.ice -= 20;
-  data.temp += 0.4;
-  data.health -= 6;
-  update();
-}
-
-function resetEarth() {
-  data = {
-    health: 100,
-    temp: 15,
-    pollution: 0,
-    trash: 0,
-    ice: 100,
-    fires: 0
-  };
-  
-  document.querySelectorAll('.trash-item, .fire-item').forEach(el => el.remove());
-  update();
-}
-
-update();
-</script>
+  <script>
+    function updateStats() {
+      const text = document.getElementById('textInput').value;
+      
+      const charCount = text.length;
+      const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const lineCount = text ? text.split('\n').length : 0;
+      const readTime = Math.ceil(wordCount / 200);
+      
+      document.getElementById('charCount').textContent = charCount;
+      document.getElementById('wordCount').textContent = wordCount;
+      document.getElementById('lineCount').textContent = lineCount;
+      document.getElementById('readTime').textContent = readTime + 'm';
+    }
+    
+    function clearText() {
+      document.getElementById('textInput').value = '';
+      updateStats();
+    }
+    
+    function copyText() {
+      document.getElementById('textInput').select();
+      document.execCommand('copy');
+      alert('Text copied!');
+    }
+  </script>
 </body>
 </html>
